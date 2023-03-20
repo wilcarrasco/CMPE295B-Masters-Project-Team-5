@@ -1,0 +1,90 @@
+* Workspace - set of directories which contain related ROS nodes
+ - can only use 1 workspace at a time
+ - ROS namespaces delimited by /
+
+* package - organization principle in ROS (container of nodes, files, ...)
+ - catkin_create_package
+ - has package.xml, defines stuff
+ - on ROS_PACKAGE_PATH
+
+* nodes - executable programs - basic unit of programming in ROS
+
+* topics - pub/sub paradigm, a topic is a channel of communication
+
+* messages - way nodes comm w/each other (pub/sub on topics)
+ - ROS package std_msgs defines message types
+
+* services
+ - ROS RPC
+ - when service called, robot waits until the service has ended before doing something else
+
+* actions
+ - when you call an action, your robot can still keep doing something else while performing the action.
+ - action allow you to provide feedback while the action is being performed
+
+* catkin - ROS build system on top of CMake and make
+
+* rqt_graph - visualizing nodes and topic communication between nodes
+
+* tf package - transform package for coordinate frame management
+
+* Tab completion
+
+
+ROS Master
+ - started by roscore (or roslaunch if not already running)
+ - traffic cop for ROS nodes
+ - keeps track of nodes, name service
+ - all active nodes publish their debug messages to /rosout topic
+
+
+Common commands
+---------------
+roscore - starts ROS master, ROS param server, rosout logging node
+rosrun
+rospack help
+rospack list
+roscd rospy_tutorials
+roscd log
+
+rosnode -h
+rosnode list -h
+rosnode help: show subcommands
+rosnode list: show active NODES (not necessarily running)
+rosnode info /rplidarNode
+
+rostopic list - gives list the topics associated with active ROS nodes
+
+Start/stop rplidar (only stops temporarily, kills process, respawns)
+roslaunch rplidar_ros rplidar.launch
+rosservice call stop_motor
+rosservice call start_motor
+
+
+rosnode info rplidarNode
+rosmsg list
+rosmsg show sensor_msgs/LaserScan
+rosmsg echo sensor_msgs/LaserScan
+
+rosparam help
+rosparam list
+
+------------------
+
+jetson@Transbot:~$ env |grep ROS
+ROS_ETC_DIR=/opt/ros/melodic/etc/ros
+ROS_ROOT=/opt/ros/melodic/share/ros
+ROS_MASTER_URI=http://192.168.0.59:11311
+ROS_VERSION=1
+ROS_PYTHON_VERSION=2
+ROS_IP=192.168.0.59
+ROS_PACKAGE_PATH=/home/jetson/transbot_ws/src:/home/jetson/software/transbot_library/src:/home/jetson/software/world_canvas/src:/opt/ros/melodic/share
+ROSLISP_PACKAGE_DIRECTORIES=/home/jetson/transbot_ws/devel/share/common-lisp:/home/jetson/software/transbot_library/devel/share/common-lisp:/home/jetson/software/world_canvas/devel/share/common-lisp
+ROS_DISTRO=melodic
+
+
+
+Resources
+---------
+http://tarangshah.com/blog/2017-04-01/ros-basics-1-nodes-topics-services-actions/#:~:text=Services%20are%20another%20way%20to,amount%20of%20time%20to%20complete.
+

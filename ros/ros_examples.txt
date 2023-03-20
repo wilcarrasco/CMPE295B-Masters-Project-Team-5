@@ -1,0 +1,48 @@
+Simple pub/sub Python ROS nodes (http://tarangshah.com/blog/2017-04-01/ros-basics-1-nodes-topics-services-actions/#:~:text=Services%20are%20another%20way%20to,amount%20of%20time%20to%20complete.)
+-----------------------------------------------------------------------------------------------
+* Inspect my_publisher.py, my_subscriber.py:
+
+* put above into ~/transbot_ws/src/transbot_laser/scripts
+ - make sure they are executable
+
+* from ~/transbot_ws, in 2 separate Terminals, run
+rosrun transbot_laser my_publisher.py
+rosrun transbot_laser my_subscriber.py
+(no custom msgs, don't need setup.bash)
+
+
+Getting rplidar data as a ROS Python node listener(https://www.youtube.com/watch?v=eciuB0p8bK0)
+-----------------------------------------------------------------------------------------------
+* Inspect my_rplidar_listener.py:
+
+* put above into ~/transbot_ws/src/transbot_laser/scripts
+ - make sure it is executable
+
+* from ~/transbot_ws, run
+rosrun transbot_laser my_rplidar_listener.py
+
+
+
+Building ROS service (https://www.youtube.com/watch?v=6RrcQFmNO58)
+------------------------------------------------------------------
+* ROS service is useful architecturally to avoid many 1-1 publish/subscribe nodes
+ - it is a service that is just waiting to be called, not consuming resources
+ - synchronous RPC (blocking, wait)
+
+* catkin_create_package service_node std_msgs rospy message_generation
+* create src/srv folder
+* create src/srv/AddTwoInts.srv (there is a request part and response part defined in .srv file)
+* edit CMakeLists (dependencies, add_service_files, generate_messages, catkin_install_python
+* create service_node/scripts folder
+* make your client.py and server.py in scripts folder
+* edit package.xml (message_runtime)
+* make python scripts executable
+* catkin_make (generates all files, creates service_node)
+
+* when running in Terminal, need to source devel/setup.bash (otherwise import errors on service_node.srv)
+* rosrun service_node server.py
+* rosrun service_node client.py 4 13
+
+* rosservice list
+* rosservice info /add_two_ints
+
