@@ -1,8 +1,8 @@
 #### Hardaware
-Jetson Nano Developer Kit 4GB
+Jetson Nano Developer Kit 4GB + Yahboom Transbot Robot
 
 #### Camera
-Logitech HD Pro Webcam C920
+Yahboom HD Camera
 
 Use the following command to check if the camera is recognized correctly.
 ```
@@ -19,4 +19,3 @@ Run ```JetsonYoloV5.py``` to detect objects with the camera.
 ```
 $ python3 JetsonYoloV5.py
 ```
-[Video File Recordings](https://drive.google.com/drive/folders/18rL822lbXBCEumcBSIpDz1um5rX6ugdv?usp=sharing)

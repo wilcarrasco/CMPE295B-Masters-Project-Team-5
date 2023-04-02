@@ -7,12 +7,16 @@ from utils.general import non_max_suppression
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class OBJ_DETECTION():
-    def __init__(self, model_path, classes):
+    def __init__(self, model_path, classes, class_focus='person'):
         self.classes = classes
+        self.class_focus = class_focus
         self.yolo_model = attempt_load(weights=model_path, map_location=device)
         self.input_width = 320
 
-    def detect(self,main_img):
+    def updateFocusClass(self, class_focus):
+        self.class_focus = class_focus
+
+    def detect(self, main_img):
         height, width = main_img.shape[:2]
         new_height = int((((self.input_width/width)*height)//32)*32)
 
@@ -30,18 +34,20 @@ class OBJ_DETECTION():
         
         if pred[0] is not None and len(pred):
             for p in pred[0]:
-                score = np.round(p[4].cpu().detach().numpy(),2)
                 label = self.classes[int(p[5])]
-                xmin = int(p[0] * main_img.shape[1] /self.input_width)
-                ymin = int(p[1] * main_img.shape[0] /new_height)
-                xmax = int(p[2] * main_img.shape[1] /self.input_width)
-                ymax = int(p[3] * main_img.shape[0] /new_height)
+                if label == self.class_focus:
 
-                item = {'label': label,
-                        'bbox' : [(xmin,ymin),(xmax,ymax)],
-                        'score': score
-                        }
+                    score = np.round(p[4].cpu().detach().numpy(),2)
+                    xmin = int(p[0] * main_img.shape[1] /self.input_width)
+                    ymin = int(p[1] * main_img.shape[0] /new_height)
+                    xmax = int(p[2] * main_img.shape[1] /self.input_width)
+                    ymax = int(p[3] * main_img.shape[0] /new_height)
 
-                items.append(item)
+                    item = {'label': label,
+                            'bbox' : [(xmin,ymin),(xmax,ymax)],
+                            'score': score
+                            }
+
+                    items.append(item)
 
         return items
