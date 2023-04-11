@@ -19,3 +19,8 @@ Run ```JetsonYoloV5.py``` to detect objects with the camera.
 ```
 $ python3 JetsonYoloV5.py
 ```
+
+Run ```JetsonYoloV5Tracker.py``` to detect objects with the camera and track with with servo.
+```
+$ python3 JetsonYoloV5Tracker.py
+```
