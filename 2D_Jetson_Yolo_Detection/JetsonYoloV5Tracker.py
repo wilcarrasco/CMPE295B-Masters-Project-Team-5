@@ -1,5 +1,6 @@
 import cv2
 import time
+from time import sleep
 import numpy as np
 from elements.yolo import OBJ_DETECTION
 from Transbot_Lib import Transbot
@@ -72,30 +73,37 @@ class yoloTrack(object):
         self.target_servoy = 90
         self.x = 320
         self.y = 240
+        self.target_aquired = 0
         self.resetServo()
 
     def resetServo(self):
+        print("Servo Reset Start")
         self.target_servox = 90
         self.target_servoy = 90
-        self.pwm_servo(self.target_servox, self.target_servoy)
+        self.pwmServo(self.target_servox, self.target_servoy)
         time.sleep(1)
-        print("Servo Reset")
+        self.bot.set_beep(0)
+        time.sleep(1)
+        self.bot.set_colorful_effect(0)
+        time.sleep(1)
+        self.floodLight(0)
+        print("Servo Reset End")
 
-    def pwm_servo(self, x, y):
+    def pwmServo(self, x, y):
         self.bot.set_pwm_servo(1, x)
         self.bot.set_pwm_servo(2, y) # only modify this for HD camera
         return x, y
 
     def floodLight(self, intensity):
-        bot.set_floodlight(intensity)
-        time.sleep(1)
+        self.bot.set_floodlight(intensity)
 
     def track(self, x, y):
         # we want to swing quickly but slow down as we converge tracking.
         adjustment = abs(x - self.x) // 100 + 1
-        print("servo adjustment: {}".format(adjustment))
+        print("X servo adjustment: {}".format(adjustment))
 
         # Adjustment margin can be increased using +- 20 for now but helps with jitter
+        # X Axis
         if x > (self.x + 20):
             self.target_servox -= adjustment
             if self.target_servox < 0:
@@ -104,7 +112,23 @@ class yoloTrack(object):
             self.target_servox += adjustment
             if self.target_servox > 180:
                 self.target_servox = 180
-        self.pwm_servo(self.target_servox, self.target_servoy)
+
+        adjustment = abs(y - self.y) // 100 + 1
+        print("Y servo adjustment: {}".format(adjustment))
+
+        # Adjustment margin can be increased using +- 20 for now but helps with jitter
+        # X Axis
+        if y > (self.y + 20):
+            self.target_servoy += adjustment
+            if self.target_servoy < 0:
+                self.target_servoy = 0
+        elif y < (self.y - 20):
+            self.target_servoy -= adjustment
+            if self.target_servoy > 180:
+                self.target_servoy = 180
+
+        # Update tracking
+        self.pwmServo(self.target_servox, self.target_servoy)
 
     def process(self, frame):
         objs = self.object_detector.detect(frame)
@@ -123,7 +147,7 @@ class yoloTrack(object):
 
             # Get the center position of detection frame
             x_pos = (xmin+xmax) // 2
-            y_pos = (ymin+ymax) // 2
+            y_pos = (((ymin+ymax) // 2) + ymin) // 2
 
         fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
         drawText(frame, "FPS: " + str(int(fps)), (20, 40))
@@ -133,8 +157,26 @@ class yoloTrack(object):
 
         # need to update this tracking boolean to be a counter
         if tracking:
+            self.target_aquired += 1
             print("xpos: {} | ypos: {}".format(x_pos, y_pos))
             self.track(x_pos, y_pos)
+            if self.target_aquired > 60:
+                self.target_aquired = 60
+        else:
+            self.target_aquired -= 1
+            if self.target_aquired < 0:
+                self.target_aquired = 0
+
+        # If object is detected after 30 frames turn in buzzer, spotlight, led bar
+        # If tracking is lost after 30 frames, turn off detection sounds
+        if self.target_aquired > 30:
+            self.bot.set_beep(1)
+            self.bot.set_colorful_effect(2, 255)
+            self.floodLight(100)
+        elif self.target_aquired < 30:
+            self.bot.set_beep(0)
+            self.bot.set_colorful_effect(0)
+            self.floodLight(0)
 
     # Dumb destructor
     def __del__(self):
@@ -149,16 +191,23 @@ if __name__ == '__main__':
         # Window
         while cv2.getWindowProperty("TransBot Camera", 0) >= 0:
             ret, frame = cap.read()
+            keyCode = cv2.waitKey(10) & 0xFF
             if ret:
                 timer = cv2.getTickCount()
 
                 # detection process
                 YoloTracker.process(frame)
 
-            keyCode = cv2.waitKey(3)
-            if keyCode == ord('q'):
+            # Change to escape key press | ordinal keys caused a segfault due to bug
+            if keyCode == 27:
                 break
+        print("Stop YOLO TRACKER")
+        YoloTracker.resetServo()
+        sleep(1)
         cap.release()
         cv2.destroyAllWindows()
+        sleep(1)
+        del YoloTracker
+        print("TERMINATE Program")
     else:
         print("Unable to open camera")
