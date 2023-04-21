@@ -5,6 +5,8 @@ Simple pub/sub Python ROS nodes (http://tarangshah.com/blog/2017-04-01/ros-basic
 * put above into ~/transbot_ws/src/transbot_laser/scripts
  - make sure they are executable
 
+* make sure ROS master is running (roscore)
+
 * from ~/transbot_ws, in 2 separate Terminals, run
 rosrun transbot_laser my_publisher.py
 rosrun transbot_laser my_subscriber.py
@@ -17,6 +19,8 @@ Getting rplidar data as a ROS Python node listener(https://www.youtube.com/watch
 
 * put above into ~/transbot_ws/src/transbot_laser/scripts
  - make sure it is executable
+
+* make sure ROS master is running (roscore)
 
 * from ~/transbot_ws, run
 rosrun transbot_laser my_rplidar_listener.py
@@ -39,6 +43,8 @@ Building ROS service (https://www.youtube.com/watch?v=6RrcQFmNO58)
 * make python scripts executable
 * catkin_make (generates all files, creates service_node)
 
+* make sure ROS master is running (roscore)
+
 * when running in Terminal, need to source devel/setup.bash (otherwise import errors on service_node.srv)
 * rosrun service_node server.py
 * rosrun service_node client.py 4 13
@@ -46,3 +52,46 @@ Building ROS service (https://www.youtube.com/watch?v=6RrcQFmNO58)
 * rosservice list
 * rosservice info /add_two_ints
 
+
+Note, by default startup script is:
+bash /home/jetson/Transbot/transbot/start_transbot.sh
+
+
+My steps
+--------
+1) Turn on (if on Transbot wifi, disconnect and reconnect to Home)
+2) Start VNC, unplug screen
+3) Kill start-up process
+4) Open (their) Terminal, horizontal 2x
+5) Start Object Detector
+ a) [Terminal 1]roslaunch astra_camera astrapro.launch
+ b) [Terminal 2]rosrun web_video_server web_video_server
+ c) [Terminal 3]roslaunch darknet_ros darknet_ros_nodelet.launch
+6) Open Terminal
+7) Start Object Counter
+ a) [Terminal 4]rosrun darknet_ros ObjConsFrames.py
+8) Open 2x Terminal
+9) Start Random Walk
+ a) [Terminal 5]roslaunch transbot_laser laser_Avoidance.launch
+ a) [Terminal 5]roslaunch transbot_laser laser_Wall.launch
+ b) [Terminal 6]rosrun rqt_reconfigure rqt_reconfigure
+10) Checkbox, Tweak settings, place, checkbox
+0.15/0.8/30/0.75
+
+11) Open Terminal
+ a) [Terminal 7]rosrun darknet_ros ObjectDepth.py
+
+
+12) instead of Random search (9), do RRT
+ a) Open Terminal->   roslaunch transbot_nav transbot_bringup.launch
+ b) Open Terminal->   roslaunch transbot_nav rrt_exploration.launch
+When RViz comes up
+  1) minimize Display panel
+  2) Click Publish Point + points on map (5x)
+   (upper left, upper right, lower right, lower left, robot)
+
+Or to drive robot with keyboard
+ c) Then to drive robot, Open Terminal
+ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+ i,j,k
+ 
