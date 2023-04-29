@@ -74,6 +74,7 @@ My steps
 9) Start Random Walk
  a) [Terminal 5]roslaunch transbot_laser laser_Avoidance.launch
  a) [Terminal 5]roslaunch transbot_laser laser_Wall.launch
+ a) [Terminal 5]roslaunch transbot_laser laser_Wall_360.launch
  b) [Terminal 6]rosrun rqt_reconfigure rqt_reconfigure
 10) Checkbox, Tweak settings, place, checkbox
 0.15/0.8/30/0.75
